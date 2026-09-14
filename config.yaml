@@ -1,0 +1,76 @@
+# Daily News Podcast configuration
+
+podcast:
+  title: "Your Daily Briefing"
+  description: "A daily 15-20 minute NPR-style briefing on trail & ultra running, legal news, Boise weather and local news, and new indie/twangy music."
+  author: "Daily Briefing Bot"
+  language: "en-us"
+  # Base URL where GitHub Pages will serve this site, e.g.
+  # https://<github-username>.github.io/<repo-name>
+  # Update this after enabling GitHub Pages on the repo (Settings -> Pages -> source: /docs on main).
+  site_url: "https://atkinsmax98-svg.github.io/newspodcast"
+  explicit: "no"
+
+# Each topic becomes one segment of the show, in this order.
+# `query` is a Google News search query. `when` restricts results to the
+# last N hours (Google News RSS supports when:Xh / when:Xd).
+topics:
+  - name: "Trail Running"
+    query: "trail running"
+    when: "1d"
+    max_articles: 5
+
+  - name: "Marathon Running"
+    query: "marathon running"
+    when: "1d"
+    max_articles: 5
+
+  - name: "Ultramarathon Running"
+    query: "ultramarathon OR ultrarunning"
+    when: "1d"
+    max_articles: 5
+
+  - name: "Running Physiology & Science"
+    query: "running physiology OR sports science running study"
+    when: "2d"
+    max_articles: 4
+
+  - name: "Legal News"
+    query: "law OR legal OR Supreme Court OR litigation"
+    when: "1d"
+    max_articles: 6
+
+  - name: "Boise, Idaho Local News"
+    query: "Boise Idaho"
+    when: "1d"
+    max_articles: 6
+
+  - name: "New Indie & Twangy Music"
+    query: "new album release indie folk OR alt-country OR Americana"
+    when: "3d"
+    max_articles: 5
+
+weather:
+  enabled: true
+  location_name: "Boise, Idaho"
+  # NOAA/NWS grid point for Boise, ID (no API key required).
+  latitude: 43.6150
+  longitude: -116.2023
+
+# Claude is used to turn the raw headlines into an NPR-style script.
+writer:
+  model: "claude-sonnet-5"
+  target_minutes: 18
+  words_per_minute: 150
+
+# ElevenLabs text-to-speech settings.
+tts:
+  provider: "elevenlabs"
+  model_id: "eleven_multilingual_v2"
+  # Default ElevenLabs "Rachel" voice ID. Replace with any voice ID from
+  # your ElevenLabs account (Voice Library -> copy Voice ID).
+  voice_id: "21m00Tcm4TlvDq8ikWAM"
+  stability: 0.45
+  similarity_boost: 0.75
+  style: 0.3
+  chunk_chars: 2200

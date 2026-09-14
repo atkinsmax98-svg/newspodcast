@@ -1,0 +1,60 @@
+name: Generate Daily Podcast
+
+on:
+  schedule:
+    # 12:00 UTC = ~5-6am America/Boise (Mountain Time), depending on DST.
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+    inputs:
+      script_only:
+        description: "Only generate the script (skip TTS + audio)"
+        required: false
+        default: "false"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-podcast
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install ffmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate today's episode
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.script_only }}" = "true" ]; then
+            python -m src.main --script-only
+          else
+            python -m src.main
+          fi
+
+      - name: Commit and push new episode
+        run: |
+          git config user.name "daily-podcast-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Add episode for $(date +'%Y-%m-%d')"
+            git push
+          fi
