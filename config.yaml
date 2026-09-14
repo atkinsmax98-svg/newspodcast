@@ -59,7 +59,7 @@ weather:
 
 # Gemini is used to turn the raw headlines into an NPR-style script.
 writer:
-  model: "gemini-2.5-flash"
+  model: "gemini-3.6-flash"
   target_minutes: 18
   words_per_minute: 150
 

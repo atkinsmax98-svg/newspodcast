@@ -64,7 +64,7 @@ def _format_segment(topic: TopicResult) -> str:
 def write_script(
     topics: list[TopicResult],
     weather_text: str,
-    model: str = "gemini-2.5-flash",
+    model: str = "gemini-3.6-flash",
     target_minutes: int = 18,
     words_per_minute: int = 150,
 ) -> str:
