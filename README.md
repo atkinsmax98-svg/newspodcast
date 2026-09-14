@@ -1,6 +1,6 @@
-# Daily News Podcast
+# Daily News Script
 
-Generates a personal ~15-20 minute daily audio briefing, NPR-style, covering:
+Generates a daily NPR-style written news briefing covering:
 
 - Trail running
 - Marathon running
@@ -11,60 +11,53 @@ Generates a personal ~15-20 minute daily audio briefing, NPR-style, covering:
 - New indie / alt-country / Americana ("twangy") music releases
 
 Each day it fetches recent headlines, has Gemini write a single flowing
-NPR-style script, converts it to speech with ElevenLabs, and publishes it as
-a real podcast: an MP3 file plus an RSS feed you can subscribe to in any
-podcast app (Apple Podcasts, Overcast, Pocket Casts, Spotify, etc.).
+NPR-style script (an anchor-style read, not audio), saves it as a text
+file, and publishes a simple browsable archive page via GitHub Pages.
+
+There's no text-to-speech step -- this produces the script only. (An
+earlier version of this project also generated audio via ElevenLabs; that
+was removed. If you want audio again later, it's a small addition: convert
+the saved `.txt` script to speech with any TTS provider/API.)
 
 ## How it works
 
 ```
 src/fetch_news.py     -> pulls recent headlines per topic from Google News RSS (no API key)
 src/fetch_weather.py  -> pulls the Boise, ID forecast from api.weather.gov (no API key)
-src/script_writer.py  -> Gemini turns headlines + weather into a spoken script
-src/tts.py            -> ElevenLabs converts the script to an MP3
-src/feed.py           -> maintains docs/feed.xml (podcast RSS) + docs/episodes/manifest.json
+src/script_writer.py  -> Gemini turns headlines + weather into a spoken-style script
+src/archive.py        -> maintains docs/index.html + docs/episodes/manifest.json
 src/main.py           -> orchestrates the whole pipeline
 ```
 
-Output lands in `docs/episodes/` (one `.mp3` + `.txt` script per day) and
-`docs/feed.xml`, which is served publicly via **GitHub Pages** from the
-`docs/` folder.
+Output lands in `docs/episodes/` (one `.txt` script per day), and
+`docs/index.html` lists all scripts published so far. `docs/` is served
+publicly via **GitHub Pages**.
 
 ## One-time setup
 
-1. **Add API keys as repository secrets** (Settings -> Secrets and variables
-   -> Actions -> New repository secret):
+1. **Add your Gemini API key as a repository secret** (Settings -> Secrets
+   and variables -> Actions -> New repository secret):
    - `GOOGLE_API_KEY` -- a Gemini API key from https://aistudio.google.com/apikey
      (Google AI Studio; sign in with any Google account, click "Create API key")
-   - `ELEVENLABS_API_KEY` -- from https://elevenlabs.io/ (Profile -> API Keys)
 
 2. **Enable GitHub Pages**: Settings -> Pages -> Source: "Deploy from a
-   branch" -> Branch: your default branch, folder `/docs`. Save.
+   branch" -> Branch: your default branch, folder `/docs`. Save. (Optional
+   -- skip this if you're fine just reading the `.txt` files in the repo.)
 
-3. **Update `config.yaml` -> `podcast.site_url`** to match the URL GitHub
-   Pages gives you (usually `https://<username>.github.io/<repo>`).
-
-4. **Merge this branch into your repo's default branch.** GitHub Actions
-   `schedule:` triggers only fire from the default branch, so the daily
-   cron job won't run until this workflow lives there.
-
-5. (Optional) Pick a different ElevenLabs voice: copy a Voice ID from your
-   ElevenLabs Voice Library and paste it into `config.yaml` -> `tts.voice_id`.
+3. **Merge this branch into your repo's default branch**, if it isn't
+   already. GitHub Actions `schedule:` triggers only fire from the default
+   branch, so the daily cron job won't run until this workflow lives there.
 
 ## Running manually
 
-In GitHub: Actions tab -> "Generate Daily Podcast" -> "Run workflow". You
-can also check "script_only" there to generate just the text script (fast,
-no ElevenLabs usage) to sanity-check the writing before spending TTS credits.
+In GitHub: Actions tab -> "Generate Daily Script" -> "Run workflow".
 
 Locally:
 
 ```bash
 pip install -r requirements.txt
 export GOOGLE_API_KEY=...
-export ELEVENLABS_API_KEY=...   # omit if using --script-only
-python -m src.main               # full episode
-python -m src.main --script-only # script only, no audio
+python -m src.main
 ```
 
 ## Customizing topics
@@ -96,6 +89,6 @@ daylight saving). Change the `cron:` line in
   full article bodies.
 - Gemini is instructed not to fabricate facts beyond what's fetched; if a
   topic has no fresh articles that day, it's mentioned briefly and skipped.
-- ElevenLabs usage costs money past its free tier; Gemini's API has a free
-  tier for the Flash models but check current limits before turning on the
-  daily schedule.
+- If a specific Gemini model ID in `config.yaml` (`writer.model`) is
+  retired, Google's API error message names the replacement model to use --
+  update `config.yaml` accordingly.

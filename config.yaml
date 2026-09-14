@@ -2,14 +2,7 @@
 
 podcast:
   title: "Your Daily Briefing"
-  description: "A daily 15-20 minute NPR-style briefing on trail & ultra running, legal news, Boise weather and local news, and new indie/twangy music."
-  author: "Daily Briefing Bot"
-  language: "en-us"
-  # Base URL where GitHub Pages will serve this site, e.g.
-  # https://<github-username>.github.io/<repo-name>
-  # Update this after enabling GitHub Pages on the repo (Settings -> Pages -> source: /docs on main).
-  site_url: "https://atkinsmax98-svg.github.io/newspodcast"
-  explicit: "no"
+  description: "A daily NPR-style news script covering trail & ultra running, legal news, Boise weather and local news, and new indie/twangy music."
 
 # Each topic becomes one segment of the show, in this order.
 # `query` is a Google News search query. `when` restricts results to the
@@ -62,15 +55,3 @@ writer:
   model: "gemini-3.6-flash"
   target_minutes: 18
   words_per_minute: 150
-
-# ElevenLabs text-to-speech settings.
-tts:
-  provider: "elevenlabs"
-  model_id: "eleven_multilingual_v2"
-  # Default ElevenLabs "Rachel" voice ID. Replace with any voice ID from
-  # your ElevenLabs account (Voice Library -> copy Voice ID).
-  voice_id: "21m00Tcm4TlvDq8ikWAM"
-  stability: 0.45
-  similarity_boost: 0.75
-  style: 0.3
-  chunk_chars: 2200
