@@ -11,8 +11,9 @@ Generates a daily NPR-style written news briefing covering:
 - New indie / alt-country / Americana ("twangy") music releases
 
 Each day it fetches recent headlines, has Gemini write a single flowing
-NPR-style script (an anchor-style read, not audio), saves it as a text
-file, and publishes a simple browsable archive page via GitHub Pages.
+NPR-style script (an anchor-style read, not audio), emails it to you, saves
+it as a text file, and publishes a simple browsable archive page via GitHub
+Pages.
 
 There's no text-to-speech step -- this produces the script only. (An
 earlier version of this project also generated audio via ElevenLabs; that
@@ -40,11 +41,26 @@ publicly via **GitHub Pages**.
    - `GOOGLE_API_KEY` -- a Gemini API key from https://aistudio.google.com/apikey
      (Google AI Studio; sign in with any Google account, click "Create API key")
 
-2. **Enable GitHub Pages**: Settings -> Pages -> Source: "Deploy from a
-   branch" -> Branch: your default branch, folder `/docs`. Save. (Optional
-   -- skip this if you're fine just reading the `.txt` files in the repo.)
+2. **Set up email delivery** (sends the script to your inbox every morning,
+   via your own Gmail account over SMTP):
+   - Turn on 2-Step Verification if you haven't already:
+     https://myaccount.google.com/security
+   - Create an App Password: https://myaccount.google.com/apppasswords --
+     choose "Mail" and name it something like "GitHub Actions", then copy
+     the 16-character password it gives you (no spaces).
+   - Add two more repository secrets:
+     - `EMAIL_USERNAME` -- your full Gmail address (e.g. `you@gmail.com`)
+     - `EMAIL_PASSWORD` -- the App Password from the step above (**not**
+       your regular Gmail password)
+   - The recipient address is set directly in
+     `.github/workflows/daily-podcast.yml` (the `to:` field under "Email
+     today's script") -- change it there if you want it sent somewhere else.
 
-3. **Merge this branch into your repo's default branch**, if it isn't
+3. **Enable GitHub Pages** (optional, for a browsable web archive of past
+   scripts in addition to email): Settings -> Pages -> Source: "Deploy from
+   a branch" -> Branch: your default branch, folder `/docs`. Save.
+
+4. **Merge this branch into your repo's default branch**, if it isn't
    already. GitHub Actions `schedule:` triggers only fire from the default
    branch, so the daily cron job won't run until this workflow lives there.
 

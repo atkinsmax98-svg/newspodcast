@@ -33,6 +33,25 @@ jobs:
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: python -m src.main
 
+      - name: Compute today's date
+        id: today
+        run: |
+          echo "date=$(date +'%Y-%m-%d')" >> "$GITHUB_OUTPUT"
+          echo "date_display=$(date +'%A, %B %d, %Y')" >> "$GITHUB_OUTPUT"
+
+      - name: Email today's script
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "Your Daily Briefing -- ${{ steps.today.outputs.date_display }}"
+          to: atkinsmax98@gmail.com
+          from: "Daily Briefing Bot <${{ secrets.EMAIL_USERNAME }}>"
+          body: file://docs/episodes/${{ steps.today.outputs.date }}.txt
+
       - name: Commit and push new script
         run: |
           git config user.name "daily-podcast-bot"
