@@ -10,7 +10,7 @@ Generates a personal ~15-20 minute daily audio briefing, NPR-style, covering:
 - Boise, Idaho local news and weather
 - New indie / alt-country / Americana ("twangy") music releases
 
-Each day it fetches recent headlines, has Claude write a single flowing
+Each day it fetches recent headlines, has Gemini write a single flowing
 NPR-style script, converts it to speech with ElevenLabs, and publishes it as
 a real podcast: an MP3 file plus an RSS feed you can subscribe to in any
 podcast app (Apple Podcasts, Overcast, Pocket Casts, Spotify, etc.).
@@ -20,7 +20,7 @@ podcast app (Apple Podcasts, Overcast, Pocket Casts, Spotify, etc.).
 ```
 src/fetch_news.py     -> pulls recent headlines per topic from Google News RSS (no API key)
 src/fetch_weather.py  -> pulls the Boise, ID forecast from api.weather.gov (no API key)
-src/script_writer.py  -> Claude turns headlines + weather into a spoken script
+src/script_writer.py  -> Gemini turns headlines + weather into a spoken script
 src/tts.py            -> ElevenLabs converts the script to an MP3
 src/feed.py           -> maintains docs/feed.xml (podcast RSS) + docs/episodes/manifest.json
 src/main.py           -> orchestrates the whole pipeline
@@ -34,7 +34,8 @@ Output lands in `docs/episodes/` (one `.mp3` + `.txt` script per day) and
 
 1. **Add API keys as repository secrets** (Settings -> Secrets and variables
    -> Actions -> New repository secret):
-   - `ANTHROPIC_API_KEY` -- from https://console.anthropic.com/
+   - `GOOGLE_API_KEY` -- a Gemini API key from https://aistudio.google.com/apikey
+     (Google AI Studio; sign in with any Google account, click "Create API key")
    - `ELEVENLABS_API_KEY` -- from https://elevenlabs.io/ (Profile -> API Keys)
 
 2. **Enable GitHub Pages**: Settings -> Pages -> Source: "Deploy from a
@@ -60,7 +61,7 @@ Locally:
 
 ```bash
 pip install -r requirements.txt
-export ANTHROPIC_API_KEY=...
+export GOOGLE_API_KEY=...
 export ELEVENLABS_API_KEY=...   # omit if using --script-only
 python -m src.main               # full episode
 python -m src.main --script-only # script only, no audio
@@ -93,7 +94,8 @@ daylight saving). Change the `cron:` line in
   scraped article text -- this avoids paywalls and scraping fragility, but
   means the script summarizes what's in the headline/snippet rather than
   full article bodies.
-- Claude is instructed not to fabricate facts beyond what's fetched; if a
+- Gemini is instructed not to fabricate facts beyond what's fetched; if a
   topic has no fresh articles that day, it's mentioned briefly and skipped.
-- ElevenLabs and Anthropic usage both cost money past their free tiers --
-  check your plan's limits before turning on the daily schedule.
+- ElevenLabs usage costs money past its free tier; Gemini's API has a free
+  tier for the Flash models but check current limits before turning on the
+  daily schedule.

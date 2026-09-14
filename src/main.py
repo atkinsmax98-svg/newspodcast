@@ -4,7 +4,7 @@ Usage:
     python -m src.main [--config config.yaml] [--script-only]
 
 Requires environment variables:
-    ANTHROPIC_API_KEY   -- for script writing (always required)
+    GOOGLE_API_KEY      -- for script writing via Gemini (always required)
     ELEVENLABS_API_KEY  -- for audio synthesis (skip with --script-only)
 """
 
@@ -52,7 +52,7 @@ def run(config_path: Path, script_only: bool) -> None:
     else:
         weather_text = "(Weather segment disabled.)"
 
-    print("[2/4] Writing NPR-style script with Claude...")
+    print("[2/4] Writing NPR-style script with Gemini...")
     writer_cfg = config["writer"]
     script_text = write_script(
         topics=topics,

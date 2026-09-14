@@ -1,11 +1,12 @@
-"""Turn fetched headlines + weather into an NPR-style spoken script using Claude."""
+"""Turn fetched headlines + weather into an NPR-style spoken script using Gemini."""
 
 from __future__ import annotations
 
 import datetime as dt
 import os
 
-import anthropic
+from google import genai
+from google.genai import types
 
 from .fetch_news import TopicResult
 
@@ -63,15 +64,15 @@ def _format_segment(topic: TopicResult) -> str:
 def write_script(
     topics: list[TopicResult],
     weather_text: str,
-    model: str = "claude-sonnet-5",
+    model: str = "gemini-2.5-flash",
     target_minutes: int = 18,
     words_per_minute: int = 150,
 ) -> str:
-    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    api_key = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        raise RuntimeError("ANTHROPIC_API_KEY environment variable is not set.")
+        raise RuntimeError("GOOGLE_API_KEY (or GEMINI_API_KEY) environment variable is not set.")
 
-    client = anthropic.Anthropic(api_key=api_key)
+    client = genai.Client(api_key=api_key)
 
     target_words = target_minutes * words_per_minute
     system_prompt = SYSTEM_PROMPT.format(target_words=target_words, target_minutes=target_minutes)
@@ -85,11 +86,10 @@ def write_script(
         segments_text=segments_text,
     )
 
-    response = client.messages.create(
+    response = client.models.generate_content(
         model=model,
-        max_tokens=8000,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_prompt}],
+        contents=user_prompt,
+        config=types.GenerateContentConfig(system_instruction=system_prompt),
     )
 
-    return "".join(block.text for block in response.content if block.type == "text").strip()
+    return response.text.strip()
